@@ -1,0 +1,21 @@
+<form [formGroup]='hero'>
+  <div>
+    Name:
+    <input type="text" class="form-control" [formControl]='name' required>
+  </div>
+  <div>
+    Price:
+    <input type="text" class="form-control" [formControl]='price' required>
+  </div>
+ 
+  
+    <label *ngFor="let key of keys;let i=index">
+      {{heroTypes[key]}}
+      <input type="checkbox" name="type" [formControl]="controls[i]">
+    </label>
+    <div>
+      <input type="button" (click)="saveHero()" value="保存">
+    </div>
+</form>
+
+ 
