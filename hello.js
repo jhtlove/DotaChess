@@ -1,43 +1,55 @@
 
 var express = require("express");
-var app = express.createServer();
+var app = express();
 
+var mongoose=require('mongoose');
+mongoose.connect('mongodb://localhost/hero',{config:{autoIndex:false}});
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log("connection success");
+});
+
+
+var heroSchema = new  mongoose.Schema({
+  name:String,
+  race:[String],
+  price:Number
+});
+heroSchema.set('autoIndex',false);
+
+heroSchema.methods.display = function () {
+  var msg = this.name + ":" + this.race.join(",") + ":" + this.price;   
+  console.log(msg);
+}
+
+var heros = mongoose.model('heros', heroSchema);
+
+
+// Kitten.find(function (err, kittens) {
+//   if (err) return console.error(err);
+//   console.log('find all: ' + kittens);
+// }) 
+
+// Kitten.find({ name: 'Silence' }, function (err, kittens) {
+//   if (err) return console.error(err);
+//   console.log("find Silence:" + kittens);
+// });
 
 app.get("/", function (request, response) {
-    response.send("Welcome!");
-});
-
-
-
-
-// connect mongodb 
-var mongoose = require("mongoose");   //需要提前使用npm安装mongodb
- 
-var url = "mongodb://127.0.0.1:27017/mongo";   //mongo是我的数据库
-var db = mongoose.connect(url,function(err){
-	if(err){
-		console.log('Cound not connect to mogo');
-	}else{
-		console.log("success connect"); // 连接成功
-		const query = new mongoose.Query();
-		quert.setOptions({price:1});
-	}
-}
-);                     //连接数据库
-
-var schema = mongoose.Schema, objectId = schema.ObjectId;
-var kittySchema = new mongoose.Schema({name:String});
-var kitten = mongoose.model('kitten',kittySchema);
-
-
-app.get("/hero/:id", function (request, response) {
-    var id = request.params.id;
-    console.log(id);
-
-    db.heros.findOne({ "name": +id }, function (error, doc) {
-        if (error) return next(error);
-        response.json(doc);
+    heros.find({name:'斧王'},function(err,heros){
+      if(err) return console.error(err);
+      response.send(heros);
     });
+    
 });
+
+app.get("/hero/:theHero", function (request, response) {
+    var theHero = request.params.theHero;
+    theHero.save(function (err, fluffy) {
+    if (err) return console.error(err);
+  });
+ 
+});   
 
  app.listen(3000);
