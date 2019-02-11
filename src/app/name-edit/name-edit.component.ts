@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-name-edit',
@@ -47,7 +48,7 @@ export class NameEditComponent implements OnInit {
     for (let i = 0; i < this.keys.length; i++) {
       this.controls[i] = new FormControl('');
     }
-    console.log(this.keys);
+    // console.log(this.keys);
     this.getAllHeros();
   }
 
@@ -56,6 +57,15 @@ export class NameEditComponent implements OnInit {
   }
 
   saveHero() {
+    // post带上httpOption就发送不成功？？？
+    // 后台 Access-Control-Allow-Headers限制了
+    // const httpOptions = {
+    //   headers: new HttpHeaders({
+    //     'Content-Type': 'application/json',
+    //     'Authorization': 'my-auth-token'
+    //   })
+    // };
+    const httpOptions = { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) };
     const heroName = this.name.value;
     const price = this.price.value;
     const types = [];
@@ -68,19 +78,33 @@ export class NameEditComponent implements OnInit {
     }
     const hero = new Hero(heroName, types, price);
     hero.display();
+
+    let isExist = false;
     for (let i = 0; i < this.heros.length; i++) {
       if (this.heros[i].name === heroName) {
         this.heros[i] = hero; // 修改
-      } else {
-        this.heros[this.count++] = hero; // 新增
+        isExist = true;
       }
     }
+    if (!isExist) {
+      this.heros[this.count++] = hero; // 新增
+      this.client.post('http://localhost:3000/hero', hero, httpOptions)
+        .subscribe(data => {
+          console.log(data);
+        });
+    }
+
+
   }
 
   getAllHeros() {
-    this.client.get('/id/' + '斧王').subscribe(data => {
-      console.log(data);
-    });
+    this.client.get('http://localhost:3000/id', { params: {} })
+      .pipe(
+
+      )
+      .subscribe(data => {
+        // console.log(data);
+      });
   }
   // setValue(i: number, key: string) {
   //   this.controls[i].value = this.heroTypes[key];
